@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <title>Todo List</title>
+</head>
+<body>
+
+    <div class="wrapper">
+        <h1>Todo App</h1>
+        <div class="inputFiled">
+            <input type="hidden" id="editid">
+            <textarea type="text" id="task" placeholder="Enter your Task"></textarea>
+            <button type="button" id="save_btn" onclick="save()"><i class="fa-solid fa-plus"></i></button>
+            <button type="button" id="edit_btn" onclick="edit()"><i class="fa-solid fa-pen"></i></button>
+            <p id="error"></p>
+        </div>
+        <ul id="record">
+            
+        </ul>
+    </div>
+
+    <script type="text/javascript">
+
+        let data = [];
+        viewdata();
+        function save(){
+            let task = document.getElementById('task').value;
+            let obj = {
+                userid : Math.floor(Math.random () * 100),
+                usertask : task
+            }
+
+            if(task == ""){
+                document.getElementById('error').innerHTML = "Please Enter Your Task";
+            }
+            else{
+                document.getElementById('error').innerHTML = "";
+
+                if(localStorage.getItem('alltask')=== null || localStorage.getItem('alltask')=== undefined){
+                    data.push(obj);
+                    localStorage.setItem('alltask',JSON.stringify(data));
+                }
+                else{
+                    let val = JSON.parse(localStorage.getItem('alltask'));
+                    val.push(obj);
+                    localStorage.setItem('alltask',JSON.stringify(val));
+                }
+                alert("Task successfully added");
+                document.getElementById('task').value = "";
+            }
+            viewdata();
+        }
+
+        function viewdata(){
+            document.getElementById('edit_btn').style.display = "none";
+            let val = JSON.parse(localStorage.getItem('alltask')) ? JSON.parse(localStorage.getItem('alltask')): [];
+            let tbl = "";
+
+            val.map((value)=>{
+                const {userid,usertask} = value;
+                tbl += `
+                            <li>
+                                <span>${userid}</span> 
+                                <p>${usertask}</p>
+                                <button type="button" onclick="editbtn(${userid})" class="btns e_btn"><i class="fa-solid fa-pen"></i></button>
+                                <button type="button" onclick="deletebtn(${userid})" class="btns d_btn"><i class="fa-solid fa-trash"></i></button>
+                            </li>
+                        `
+            })
+            document.getElementById('record').innerHTML = tbl;
+        }
+
+        function deletebtn(id){
+            let val = JSON.parse(localStorage.getItem('alltask'));
+
+            let ans = val.filter((rec)=>{
+                return rec.userid != id;
+            })
+            localStorage.setItem('alltask',JSON.stringify(ans));
+            alert("Task successfully deleted");
+            viewdata();
+        }
+
+        function editbtn(id){
+            document.getElementById('save_btn').style.display = "none";
+            document.getElementById('edit_btn').style.display = "block";
+            let val = JSON.parse(localStorage.getItem('alltask'));
+
+            for(let i in val){
+                if(val[i].userid == id){
+                    document.getElementById('editid').value = val[i].userid;
+                    document.getElementById('task').value = val[i].usertask;
+                }
+            }
+        }
+
+        function edit(){
+            let id = document.getElementById('editid').value;
+            let task = document.getElementById('task').value;
+
+            let val =JSON.parse(localStorage.getItem('alltask'));
+            for(let i in val){
+                if(val[i].userid == id){
+                    val[i].usertask = task;
+                }
+                localStorage.setItem('alltask',JSON.stringify(val));
+            }
+            alert("Task successfully updated");
+            document.getElementById('task').value = "";
+            viewdata();
+            document.getElementById('save_btn').style.display = "block";
+            document.getElementById('edit_btn').style.display = "none";
+        }
+    </script>
+
+</body>
+</html>
